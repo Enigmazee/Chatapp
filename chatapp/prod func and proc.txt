@@ -1,0 +1,29 @@
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetUser`(buser INT) RETURNS varchar(50) CHARSET latin1
+BEGIN
+
+DECLARE user varchar(50);
+
+SELECT concat(fname,', ', sname) INTO user from users where id = buser;
+
+RETURN USER;
+
+END$$
+DELIMITER ;
+
+
+
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GenerateDailyRegister`(IN `bdate` DATE, IN `buser` INT)
+BEGIN
+DECLARE header INT;
+
+INSERT INTO backup_header (backup_by, backup_date, del_flg) VALUES (buser,bdate,'N');
+
+SELECT max(id) INTO header from backup_header where backup_by = buser and backup_date= bdate and del_flg = 'N';
+
+INSERT INTO backup_details (header_id, location_id, backup_time, successful, text) select header, id, sysdate(), 'Y', CONCAT('Backup of ',name,' on ',ip) from backup_location where del_flg = 'N';
+
+END$$
+DELIMITER ;
